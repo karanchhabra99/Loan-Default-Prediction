@@ -1,0 +1,1533 @@
+---
+title: "Final Project"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '6'
+  html_notebook:
+    theme: united
+    toc: yes
+  word_document:
+    toc: yes
+    toc_depth: 6
+---
+\pagenumbering{gobble}
+
+```
+Name: Erick Li & Karan Chhabra
+```
+
+#### Loading the Data
+```{r}
+df_train = read.csv("train.csv")
+df_test = read.csv("test.csv")
+
+str(df_train)
+```
+
+#### EDA
+```{r}
+summary(df_train)
+```
+
+```{r}
+df_train$Credit.Default = as.factor(df_train$Credit.Default)
+library(ggplot2)
+
+ggplot(df_train, aes(x = Credit.Default)) +
+  geom_bar(fill = "#0073C2FF") +
+geom_text(stat='count', aes(label=..count..), vjust=-1) + 
+    ylim(0, 6000)
+
+ggplot(df_train, aes(x = Home.Ownership)) +
+  geom_bar(fill = "#0073C2FF") +
+geom_text(stat='count', aes(label=..count..), vjust=-1) + 
+    ylim(0, 4000)
+
+
+#Purpose
+ggplot(df_train, aes(x = Purpose)) +
+  geom_bar(fill = "#0073C2FF") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+geom_text(stat='count', aes(label=..count..), vjust=-1) + 
+    ylim(0, 6200)
+
+# Term
+ggplot(df_train, aes(x = Term)) +
+  geom_bar(fill = "#0073C2FF") +
+geom_text(stat='count', aes(label=..count..), vjust=-1) + 
+    ylim(0, 6000)
+
+# Years in Current Job
+ggplot(df_train, aes(x = Years.in.current.job)) +
+  geom_bar(fill = "#0073C2FF") +
+geom_text(stat='count', aes(label=..count..), vjust=-1) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + 
+  ylim(0, 2500)
+
+
+library(gridExtra)
+require(scales)
+
+## Annual Income
+plot1 = ggplot(df_train, aes(Annual.Income)) +
+  geom_histogram(fill = "#0073C2FF") +
+  scale_x_continuous(labels = scales::comma)
+
+plot2 = ggplot(df_train, aes(x=Credit.Default, y=Annual.Income, color=Credit.Default)) + 
+  geom_boxplot() + 
+  scale_color_manual(values=c("#56B4E9", "#FF0000")) +
+  scale_y_continuous(labels = scales::comma)
+
+
+grid.arrange(plot1, plot2, ncol=2)
+
+# Number of Open Accounts
+plot1 =ggplot(df_train, aes(x = Number.of.Open.Accounts)) +
+  geom_histogram(fill = "#0073C2FF")
+
+plot2 = ggplot(df_train, aes(x=Credit.Default, y=Number.of.Open.Accounts , color=Credit.Default)) + 
+  geom_boxplot() + 
+  scale_color_manual(values=c("#56B4E9", "#FF0000"))
+
+grid.arrange(plot1, plot2, ncol=2)
+
+## Tax.Liens
+plot1 = ggplot(df_train, aes(Tax.Liens)) +
+  geom_bar(fill = "#0073C2FF") +
+  geom_text(stat='count', aes(label=..count..), vjust=-1)+
+  ylim(0,7500)
+
+plot2 = ggplot(df_train, aes(x=Credit.Default, y=Tax.Liens, color=Credit.Default)) + 
+  geom_boxplot() + 
+  scale_color_manual(values=c("#56B4E9", "#FF0000"))
+
+grid.arrange(plot1, plot2, ncol=2)
+
+# Bankruptcies
+plot1 = ggplot(df_train, aes(x = Bankruptcies)) +
+  geom_bar(fill = "#0073C2FF") +
+geom_text(stat='count', aes(label=..count..), vjust=-1) +
+  ylim(0, 7000)
+
+plot2 = ggplot(df_train, aes(x=Credit.Default, y=Bankruptcies, color=Credit.Default)) + 
+  geom_boxplot() + 
+  scale_color_manual(values=c("#56B4E9", "#FF0000"))
+
+grid.arrange(plot1, plot2, ncol=2)
+
+
+# Number of Credit Problems
+plot1 = ggplot(df_train, aes(x = Number.of.Credit.Problems)) +
+  geom_bar(fill = "#0073C2FF")  +
+geom_text(stat='count', aes(label=..count..), vjust=-1) +
+  ylim(0, 6800)
+
+plot2 = ggplot(df_train, aes(x=Credit.Default, y=Number.of.Credit.Problems, color=Credit.Default)) + 
+  geom_boxplot() + 
+  scale_color_manual(values=c("#56B4E9", "#FF0000"))
+
+grid.arrange(plot1, plot2, ncol=2)
+
+
+# Years of Credit History
+plot1 =ggplot(df_train, aes(x = Years.of.Credit.History)) +
+  geom_histogram(fill = "#0073C2FF")
+
+plot2 = ggplot(df_train, aes(x=Credit.Default, y=Years.of.Credit.History, color=Credit.Default)) + 
+  geom_boxplot() + 
+  scale_color_manual(values=c("#56B4E9", "#FF0000"))
+
+grid.arrange(plot1, plot2, ncol=2)
+
+
+# Months since last delinquent
+plot1 =ggplot(df_train, aes(x = Months.since.last.delinquent)) +
+  geom_histogram(fill = "#0073C2FF")
+
+plot2 = ggplot(df_train, aes(x=Credit.Default, y=Months.since.last.delinquent, color=Credit.Default)) + 
+  geom_boxplot() + 
+  scale_color_manual(values=c("#56B4E9", "#FF0000"))
+
+grid.arrange(plot1, plot2, ncol=2)
+
+
+# Current Loan Amount
+plot1 =ggplot(df_train, aes(x = Current.Loan.Amount)) +
+  geom_histogram(fill = "#0073C2FF")  +
+  scale_x_continuous(labels = scales::comma)
+
+plot2 = ggplot(df_train, aes(x=Credit.Default, y=Current.Loan.Amount, color=Credit.Default)) + 
+  geom_boxplot() + 
+  scale_color_manual(values=c("#56B4E9", "#FF0000"))  +
+  scale_y_continuous(labels = scales::comma)
+
+grid.arrange(plot1, plot2, ncol=2)
+
+
+# Current Credit Balance
+plot1 =ggplot(df_train, aes(x = Current.Credit.Balance)) +
+  geom_histogram(fill = "#0073C2FF")  +
+  scale_x_continuous(labels = scales::comma)
+
+plot2 = ggplot(df_train, aes(x=Credit.Default, y=Current.Credit.Balance, color=Credit.Default)) + 
+  geom_boxplot() + 
+  scale_color_manual(values=c("#56B4E9", "#FF0000"))  +
+  scale_y_continuous(labels = scales::comma)
+
+grid.arrange(plot1, plot2, ncol=2)
+
+
+# Maximum Open Credit
+plot1 =ggplot(df_train, aes(x = Maximum.Open.Credit)) +
+  geom_histogram(fill = "#0073C2FF") +
+  scale_x_continuous(labels = scales::comma)
+
+plot2 = ggplot(df_train, aes(x=Credit.Default, y=Maximum.Open.Credit, color=Credit.Default)) + 
+  geom_boxplot() + 
+  scale_color_manual(values=c("#56B4E9", "#FF0000")) +
+  scale_y_continuous(labels = scales::comma)
+
+grid.arrange(plot1, plot2, ncol=2)
+
+
+
+# Maximum Open Credit (Zoomed)
+plot1 =ggplot(df_train, aes(x = Maximum.Open.Credit)) +
+  geom_histogram(fill = "#0073C2FF") +
+  scale_x_continuous(labels = scales::comma) + xlim(0, 2000000)
+
+plot2 = ggplot(df_train, aes(x=Credit.Default, y=Maximum.Open.Credit, color=Credit.Default)) + 
+  geom_boxplot() + 
+  scale_color_manual(values=c("#56B4E9", "#FF0000")) +
+  scale_y_continuous(labels = scales::comma) + ylim(0, 2000000)
+
+grid.arrange(plot1, plot2, ncol=2)
+
+
+# Monthly Debt
+plot1 =ggplot(df_train, aes(x = Monthly.Debt)) +
+  geom_histogram(fill = "#0073C2FF") +
+  scale_x_continuous(labels = scales::comma)
+
+plot2 = ggplot(df_train, aes(x=Credit.Default, y=Monthly.Debt, color=Credit.Default)) + 
+  geom_boxplot() + 
+  scale_color_manual(values=c("#56B4E9", "#FF0000")) +
+  scale_y_continuous(labels = scales::comma)
+
+grid.arrange(plot1, plot2, ncol=2)
+
+
+# Credit Score
+plot1 =ggplot(df_train, aes(x = Credit.Score)) +
+  geom_histogram(fill = "#0073C2FF") + 
+  xlim(0,850)
+
+plot2 = ggplot(df_train, aes(x=Credit.Default, y=Credit.Score, color=Credit.Default)) + 
+  geom_boxplot() + 
+  scale_color_manual(values=c("#56B4E9", "#FF0000")) + 
+  ylim(0,850)
+
+grid.arrange(plot1, plot2, ncol=2)
+
+
+
+```
+From the above Exploratory Data Analysis (EDA) following can be inferred that:
+1. Annual Income: There is very little relationship betweent the annual Income and credit default, so this might be an impotant predictor.
+2. Year in Current Job: The median of people with and without default is different, so this might be an impotant predictor.
+3. Number of Open Account: There is no different in people on the bases of number of open account, so this predictor will not be used for prediction.
+4. 
+
+```{r}
+table(df_train$Home.Ownership, df_train$Credit.Default)
+```
+
+```{r}
+table(df_train$Tax.Liens, df_train$Credit.Default)
+```
+
+
+
+
+```{r}
+table(df_train$Number.of.Credit.Problems, df_train$Credit.Default)
+```
+
+
+```{r}
+table(df_train$Years.in.current.job, df_train$Credit.Default)
+```
+
+```{r}
+table(df_train$Purpose, df_train$Credit.Default)
+```
+
+```{r}
+table(df_train$Term, df_train$Credit.Default)
+```
+
+```{r}
+str(df_train)
+```
+
+
+
+
+```{r}
+cat("Training Set\n")
+apply(is.na(df_train), 2, sum)
+cat('\n\nTest set')
+apply(is.na(df_test), 2, sum)
+```
+
+
+#### Data Cleaning and Transformation
+##### Data Cleaning
+```{r}
+df_train$Annual.Income[is.na(df_train$Annual.Income)] = median(df_train$Annual.Income, na.rm = T)
+## filling test set na values also with training set mean
+df_test$Annual.Income[is.na(df_test$Annual.Income)] = median(df_train$Annual.Income, na.rm = T)
+
+df_train$Months.since.last.delinquent[is.na(df_train$Months.since.last.delinquent)] = median(df_train$Months.since.last.delinquent, na.rm = T)
+## filling test set na values also with training set mean
+df_test$Months.since.last.delinquent[is.na(df_test$Months.since.last.delinquent)] = median(df_train$Months.since.last.delinquent, na.rm = T)
+
+df_train$Bankruptcies[is.na(df_train$Bankruptcies)] = median(df_train$Bankruptcies, na.rm = T)
+## filling test set na values also with training set mean
+df_test$Bankruptcies[is.na(df_test$Bankruptcies)] = median(df_train$Bankruptcies, na.rm = T)
+
+df_train$Credit.Score[is.na(df_train$Credit.Score)] = median(df_train$Credit.Score, na.rm = T)
+## filling test set na values also with training set mean
+df_test$Credit.Score[is.na(df_test$Credit.Score)] = median(df_train$Credit.Score, na.rm = T)
+```
+
+##### Outliers
+```{r}
+#Current Loan Amount
+df_train$Current.Loan.Amount = ifelse(df_train$Current.Loan.Amount == 99999999, NA, df_train$Current.Loan.Amount)
+df_test$Current.Loan.Amount = ifelse(df_test$Current.Loan.Amount == 99999999, NA, df_test$Current.Loan.Amount)
+
+
+df_train$Current.Loan.Amount[is.na(df_train$Current.Loan.Amount)] = median(df_train$Current.Loan.Amount, na.rm = T)
+## filling test set na values also with training set mean
+df_test$Current.Loan.Amount[is.na(df_test$Current.Loan.Amount)] = median(df_train$Current.Loan.Amount, na.rm = T)
+
+
+## Credit Score
+df_train$Credit.Score = ifelse(df_train$Credit.Score >850, NA, df_train$Credit.Score)
+df_test$Credit.Score = ifelse(df_test$Credit.Score >850, NA, df_test$Credit.Score)
+
+
+
+df_train$Credit.Score[is.na(df_train$Credit.Score)] = median(df_train$Credit.Score, na.rm = T)
+## filling test set na values also with training set mean
+df_test$Credit.Score[is.na(df_test$Credit.Score)] = median(df_train$Credit.Score, na.rm = T)
+
+```
+
+##### Data Transformation
+```{r}
+# Log transformation
+# Adding epislon to avoid error in case of log
+df_train$Annual.Income_trans = log(df_train$Annual.Income + .Machine$double.eps)
+df_test$Annual.Income_trans = log(df_test$Annual.Income + .Machine$double.eps)
+
+# Adding one to avoid error in case of log
+df_train$Monthly.Debt = log(df_train$Monthly.Debt + .Machine$double.eps)
+df_test$Monthly.Debt = log(df_test$Monthly.Debt + .Machine$double.eps)
+
+
+# Purpose
+df_train$Purpose_Trans = as.factor(ifelse(df_train$Purpose == "debt consolidation", "debt consolidation", 
+                                ifelse(df_train$Purpose == "other", "other", "miscellaneous")))
+
+# Purpose
+df_test$Purpose_Trans = as.factor(ifelse(df_test$Purpose == "debt consolidation", "debt consolidation", 
+                                ifelse(df_test$Purpose == "other", "other", "miscellaneous")))
+
+df_train$Purpose = NULL
+df_test$Purpose = NULL
+
+
+## Number of credit problems
+df_train$Number.of.Credit.Problems = ifelse(df_train$Number.of.Credit.Problems >1, 1, df_train$Number.of.Credit.Problems)
+df_test$Number.of.Credit.Problems = ifelse(df_test$Number.of.Credit.Problems >1, 1, df_test$Number.of.Credit.Problems)
+
+# Tax Liens
+df_train$Tax.Liens = ifelse(df_train$Tax.Liens > 1 , 1, df_train$Tax.Liens)
+df_test$Tax.Liens = ifelse(df_test$Tax.Liens > 1 , 1, df_test$Tax.Liens)
+
+#Bankruptcies
+df_train$Bankruptcies = ifelse(df_train$Bankruptcies > 1, 1, df_train$Bankruptcies)
+df_test$Bankruptcies = ifelse(df_test$Bankruptcies > 1, 1, df_test$Bankruptcies)
+
+```
+
+
+##### Data Transformation and Outliers
+```{r}
+# Year in Current Job
+df_train$Years.in.current.job = as.character(df_train$Years.in.current.job)
+df_test$Years.in.current.job = as.character(df_test$Years.in.current.job)
+
+df_train$Years.in.current.job = ifelse(df_train$Years.in.current.job == "< 1 year", "0 Years", df_train$Years.in.current.job)
+df_test$Years.in.current.job = ifelse(df_test$Years.in.current.job %in% "< 1 year", "0 Years", df_test$Years.in.current.job)
+
+df_train$Years.in.current.job = as.numeric(gsub("[^\\d]+", "", df_train$Years.in.current.job, perl=TRUE))
+df_test$Years.in.current.job = as.numeric(gsub("[^\\d]+", "", df_test$Years.in.current.job, perl=TRUE))
+
+df_train$Years.in.current.job = ifelse(df_train$Years.in.current.job == "", NA, df_train$Years.in.current.job)
+df_test$Years.in.current.job = ifelse(df_test$Years.in.current.job == "", NA, df_test$Years.in.current.job)
+
+
+df_train$Years.in.current.job[is.na(df_train$Years.in.current.job)] = median(df_train$Years.in.current.job, na.rm = T)
+## filling test set na values also with training set mean
+df_test$Years.in.current.job[is.na(df_test$Years.in.current.job)] = median(df_train$Years.in.current.job, na.rm = T)
+
+
+```
+
+
+```{r}
+str(df_train)
+```
+
+#### Feature Engineering
+```{r}
+# df_train$DebtPayingCapacity = df_train$Annual.Income / (ifelse(df_train$Monthly.Debt == 0, 1, df_train$Monthly.Debt) * 12)
+# df_test$DebtPayingCapacity = df_test$Annual.Income / (ifelse(df_test$Monthly.Debt == 0,1, df_test$Monthly.Debt) * 12)
+
+df_train$DebtProportionLiquidAsset = (df_train$Current.Loan.Amount) / ((df_train$Annual.Income/12)  + df_train$Current.Credit.Balance)
+df_test$DebtProportionLiquidAsset = (df_test$Current.Loan.Amount) / ((df_test$Annual.Income/12)  + df_test$Current.Credit.Balance)
+
+# df_train$FurtherLoanCapacity = df_train$Maximum.Open.Credit - (df_train$Current.Loan.Amount + df_train$Current.Credit.Balance)
+# df_test$FurtherLoanCapacity = df_test$Maximum.Open.Credit - (df_test$Current.Loan.Amount + df_test$Current.Credit.Balance)
+
+df_train$Annual.Income = NULL
+df_test$Annual.Income = NULL
+
+str(df_train)
+```
+
+
+
+#### Collinearity Check
+#####Correlation
+```{r}
+a = subset(df_train, select = c(Years.in.current.job, Tax.Liens, Number.of.Open.Accounts, Years.of.Credit.History,
+                                Maximum.Open.Credit, Number.of.Credit.Problems,Months.since.last.delinquent,
+                                Bankruptcies, Current.Loan.Amount, Monthly.Debt, Credit.Score, Annual.Income_trans,
+                                DebtProportionLiquidAsset, as.numeric(Credit.Default)))
+
+a$Years.in.current.job = as.numeric(a$Years.in.current.job)
+a$Credit.Default = as.numeric(a$Credit.Default)
+
+(cor(a)>0.8)
+
+```
+It can be seen that no numeric variables has strong correlation with one another.
+
+```{r}
+# library(corrplot)
+library(corrgram)
+# print(corrplot(df_train[,c("Annual.Income", "Number.of.Open.Accounts", 
+#                            "Years.of.Credit.History", "Number.of.Credit.Problems",
+#                            "Months.since.last.delinquent", "Months.since.last.delinquent",
+#                            "Current.Loan.Amount", "Monthly.Debt",
+#                            "Credit.Score")]),method='color')
+print(corrgram(a))
+#rm(a)
+```
+
+```{r}
+df_train$Bankruptcies = NULL
+df_test$Bankruptcies = NULL
+```
+
+
+```{r}
+library(car)
+glm.fit = glm(Credit.Default~ Home.Ownership + Years.in.current.job + Tax.Liens + Number.of.Open.Accounts +
+                Years.of.Credit.History + Maximum.Open.Credit + Number.of.Credit.Problems +
+                Months.since.last.delinquent  + Term + Current.Loan.Amount + 
+                Current.Credit.Balance + Monthly.Debt + Credit.Score + Annual.Income_trans + 
+                Purpose_Trans+ DebtProportionLiquidAsset,
+              data =df_train, family = binomial)
+vif(glm.fit)
+```
+
+No value of GVIF^(1/(2*Df)) is higher than 5, so we can interpret that the data set does not have collinearity.
+
+#### Over Sampling (Commented as it was reducing the holdout set F1 score)
+```{r}
+# Default_df = df_train[df_train$Credit.Default == 1,]
+# ## Sampling with replacement
+# Over_sample = sample(nrow(Default_df), nrow(Default_df), replace = TRUE)
+# 
+# cat("\nBefore\n")
+# table(df_train$Credit.Default)
+# 
+# df_train = rbind(df_train, Default_df[Over_sample,])
+# 
+# cat("\nAfter\n")
+# table(df_train$Credit.Default)
+```
+
+
+
+#### Training Test Split
+```{r}
+set.seed(52)
+train = sample(nrow(df_train), nrow(df_train)* 0.7)
+train_df = df_train[train, ]
+dev_df = df_train[-train, ]
+
+train_df$Id = NULL
+dev_df$Id = NULL
+```
+
+
+#### Model Selection
+
+##### Geometric Mean Function (Helper Function)
+```{r}
+library(pROC)
+
+GeometricMean = function(ProbPred, devset_default, modelName) {
+  par(pty ='s')
+  log_roc = roc(devset_default, ProbPred, plot = FALSE, percent = TRUE, xlab= "FPR", ylab = "TPR", legacy.axes = TRUE)
+  cat("\nThe AUC of the ", modelName, " model is ", log_roc$auc)
+
+roc.df = data.frame(
+  tpr = log_roc$sensitivities,
+  specificity = log_roc$specificities,
+  gmean = sqrt(log_roc$sensitivities * log_roc$specificities),
+  threshold = log_roc$thresholds
+)
+
+return (roc.df[roc.df$gmean == max(roc.df$gmean), ]$threshold)
+}
+```
+
+
+##### Logistic Regression
+```{r}
+library(pROC)
+
+glm.fit = glm(Credit.Default~., data =train_df, family = binomial)
+summary(glm.fit)
+
+glm.pred = predict(glm.fit, dev_df, type="response")
+
+threshold = GeometricMean(glm.pred, dev_df$Credit.Default, "logistic")
+cat("\n The cut off threshold is: ", threshold)
+
+glm.class = ifelse(glm.pred > threshold, 1 , 0)
+
+log.table = table(glm.class, dev_df$Credit.Default)[2:1, 2:1]
+log.table
+Accuracy_glm = (log.table[1,1] + log.table[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the logistic model is ", Accuracy_glm)
+
+Precision_glm = log.table[1,1] /(log.table[1,1] + log.table[1,2])
+Recall_glm = log.table[1,1] /(log.table[1,1] + log.table[2,1])
+F1_score_log = 2* ((Precision_glm * Recall_glm) / (Precision_glm+ Recall_glm))
+cat("\nThe F1_score of the logistic model is ", F1_score_log)
+
+```
+
+
+```{r}
+
+yhat = predict(glm.fit, df_test, type="response")
+
+df_test$Credit.Default = ifelse(yhat > threshold, 1 , 0)
+
+submit = data.frame(df_test$Id, df_test$Credit.Default)
+colnames(submit) = c("Id", "Credit Default")
+write.csv(submit,"holdout_log.csv", row.names = FALSE)
+df_test$Credit.Default = NULL
+```
+
+
+##### KNN
+```{r}
+library(class)
+
+F1_score_knn = NULL
+knn_n = seq(1,20,2)
+threshold_knn = NULL
+# trying 10 different values of k
+for (i in knn_n) {
+
+knn_pred = knn(scale(train_df[,c("Years.in.current.job", "Tax.Liens", "Number.of.Open.Accounts", "Years.of.Credit.History",
+"Maximum.Open.Credit", "Number.of.Credit.Problems", "Months.since.last.delinquent",
+"Current.Loan.Amount", "Current.Credit.Balance", "Monthly.Debt", "Credit.Score",
+"Annual.Income_trans", "DebtProportionLiquidAsset")]),
+               scale(dev_df[,c("Years.in.current.job", "Tax.Liens", "Number.of.Open.Accounts", "Years.of.Credit.History",
+"Maximum.Open.Credit", "Number.of.Credit.Problems", "Months.since.last.delinquent",
+"Current.Loan.Amount", "Current.Credit.Balance", "Monthly.Debt", "Credit.Score",
+"Annual.Income_trans", "DebtProportionLiquidAsset")]),
+               train_df$Credit.Default, k = i, prob = TRUE)
+
+
+threshold_knn = GeometricMean(attributes(knn_pred)$prob, dev_df$Credit.Default, "KNN")
+
+cat("\n The cut off threshold is: ", threshold_knn)
+
+
+knn.class = ifelse(attributes(knn_pred)$prob > threshold_knn, 1 , 0)
+
+knn.table = table(knn.class, dev_df$Credit.Default)[2:1, 2:1]
+knn.table
+Accuracy_knn = (knn.table[1,1] + knn.table[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the KNN model is ", Accuracy_knn)
+
+Precision_knn = knn.table[1,1] /(knn.table[1,1] + knn.table[1,2])
+Recall_knn = knn.table[1,1] /(knn.table[1,1] + knn.table[2,1])
+F1_score_knn = 2* ((Precision_knn * Recall_knn) / (Precision_knn+ Recall_knn))
+cat("\nThe F1_score of the KNN model is ", F1_score_knn)
+}
+
+index = which.max(F1_score_knn)
+
+cat("\nThe best F1 score has ", knn_n[index], " and the F1 score corresponding to it is ", F1_score_knn[index])
+```
+
+
+```{r}
+
+yhat =  knn(scale(train_df[,c("Years.in.current.job", "Tax.Liens", "Number.of.Open.Accounts", "Years.of.Credit.History",
+"Maximum.Open.Credit", "Number.of.Credit.Problems", "Months.since.last.delinquent",
+"Current.Loan.Amount", "Current.Credit.Balance", "Monthly.Debt", "Credit.Score",
+"Annual.Income_trans", "DebtProportionLiquidAsset")]),
+               scale(df_test[,c("Years.in.current.job", "Tax.Liens", "Number.of.Open.Accounts", "Years.of.Credit.History",
+"Maximum.Open.Credit", "Number.of.Credit.Problems", "Months.since.last.delinquent",
+"Current.Loan.Amount", "Current.Credit.Balance", "Monthly.Debt", "Credit.Score",
+"Annual.Income_trans", "DebtProportionLiquidAsset")]),
+               train_df$Credit.Default, k = i, prob = TRUE)
+
+df_test$Credit.Default = ifelse(attributes(yhat)$prob > threshold_knn[index], 1 , 0)
+
+submit = data.frame(df_test$Id, df_test$Credit.Default)
+colnames(submit) = c("Id", "Credit Default")
+write.csv(submit,"holdout_knn.csv", row.names = FALSE)
+df_test$Credit.Default = NULL
+```
+
+
+##### LDA
+```{r}
+library(MASS)
+lda.fit = lda(Credit.Default~., data = train_df)
+summary(lda.fit)
+lda.pred = predict(lda.fit, dev_df)
+
+threshold_lda = GeometricMean(lda.pred$posterior[,2], dev_df$Credit.Default, "LDA")
+cat("\n The cut off threshold is: ", threshold_lda)
+
+
+lda.class = ifelse(lda.pred$posterior[,2] > threshold_lda, 1 , 0)
+
+lda.table = table(lda.class, dev_df$Credit.Default)[2:1, 2:1]
+lda.table
+Accuracy_lda = (lda.table[1,1] + lda.table[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the LDA model is ", Accuracy_lda)
+
+Precision_lda = lda.table[1,1] /(lda.table[1,1] + lda.table[1,2])
+Recall_lda = lda.table[1,1] /(lda.table[1,1] + lda.table[2,1])
+F1_score_lda = 2* ((Precision_lda * Recall_lda) / (Precision_lda+ Recall_lda))
+cat("\nThe F1_score of the LDA model is ", F1_score_lda)
+
+```
+
+```{r}
+
+yhat =  predict(lda.fit, df_test)
+
+df_test$Credit.Default = ifelse(yhat$posterior[,2] > threshold_lda, 1 , 0)
+
+submit = data.frame(df_test$Id, df_test$Credit.Default)
+colnames(submit) = c("Id", "Credit Default")
+write.csv(submit,"holdout_lda.csv", row.names = FALSE)
+df_test$Credit.Default = NULL
+```
+
+
+
+##### QDA
+```{r}
+library(MASS)
+qda.fit = qda(Credit.Default~., data = train_df)
+summary(qda.fit)
+qda.pred = predict(qda.fit, dev_df)
+
+threshold_qda = GeometricMean(qda.pred$posterior[,2], dev_df$Credit.Default, "QDA")
+cat("\n The cut off threshold is: ", threshold_qda)
+
+
+qda.class = ifelse(qda.pred$posterior[,2] > threshold_qda, 1 , 0)
+
+qda.table = table(qda.class, dev_df$Credit.Default)[2:1, 2:1]
+qda.table
+Accuracy_qda = (qda.table[1,1] + qda.table[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the QDA model is ", Accuracy_qda)
+
+Precision_qda = qda.table[1,1] /(qda.table[1,1] + qda.table[1,2])
+Recall_qda = qda.table[1,1] /(qda.table[1,1] + qda.table[2,1])
+F1_score_qda = 2* ((Precision_qda * Recall_qda) / (Precision_qda+ Recall_qda))
+cat("\nThe F1_score of the QDA model is ", F1_score_qda)
+
+```
+
+```{r}
+
+yhat =  predict(qda.fit, df_test)
+
+df_test$Credit.Default = ifelse(yhat$posterior[,2] > threshold_qda, 1 , 0)
+
+submit = data.frame(df_test$Id, df_test$Credit.Default)
+colnames(submit) = c("Id", "Credit Default")
+write.csv(submit,"holdout_qda.csv", row.names = FALSE)
+df_test$Credit.Default = NULL
+```
+
+
+
+##### Ridge Regression
+```{r}
+library(glmnet)
+x_train = model.matrix(Credit.Default~., data = train_df)
+y_train = train_df$Credit.Default
+
+x_test = model.matrix(Credit.Default~., data = dev_df)
+y_test = dev_df$Credit.Default
+
+grid =10^seq(10,-2, length= 100)
+
+ridge.mod = glmnet(x_train, y_train, alpha = 0, lambda = grid, thresh = 1e-12, family = "binomial")
+set.seed(22)
+cv.out = cv.glmnet(x_train, y_train, alpha = 0, family = "binomial")
+
+bestlam = cv.out$lambda.min
+cat("The best lambda value for ridge regression is: ", bestlam)
+
+ridge.pred = predict(ridge.mod, s = bestlam, newx = x_test, type="response")
+
+threshold = GeometricMean(ridge.pred, dev_df$Credit.Default, "Ridge")
+cat("\n The cut off threshold is: ", threshold)
+
+
+ridge.class = ifelse(ridge.pred > threshold, 1 , 0)
+
+ridge.table = table(ridge.class, dev_df$Credit.Default)[2:1, 2:1]
+ridge.table
+Accuracy_ridge = (ridge.table[1,1] + ridge.table[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the ridge model is ", Accuracy_ridge)
+
+Precision_ridge = ridge.table[1,1] /(ridge.table[1,1] + ridge.table[1,2])
+Recall_ridge = ridge.table[1,1] /(ridge.table[1,1] + ridge.table[2,1])
+F1_score_ridge = 2* ((Precision_ridge * Recall_ridge) / (Precision_ridge+ Recall_ridge))
+cat("\nThe F1_score of the logistic model is ", F1_score_ridge)
+
+```
+
+```{r}
+test_data = df_test
+test_data$Id = NULL
+test_data$Credit.Default = 1
+test_data = model.matrix(Credit.Default~., data = test_data)
+
+
+
+yhat = predict(ridge.mod, s = bestlam, newx =test_data, type="response")
+
+df_test$Credit.Default = ifelse(yhat > threshold, 1 , 0)
+
+submit = data.frame(df_test$Id, df_test$Credit.Default)
+colnames(submit) = c("Id", "Credit Default")
+write.csv(submit,"holdout_ridge.csv", row.names = FALSE)
+df_test$Credit.Default = NULL
+```
+
+
+
+
+##### LASSO Regression
+```{r}
+lasso.mod = glmnet(x_train, y_train, alpha = 1, lambda = grid, family = "binomial")
+
+set.seed(41)
+cv.out = cv.glmnet(x_train, y_train, alpha = 1, family = "binomial")
+
+bestlam = cv.out$lambda.min
+cat("The best lambda value for lasso regression is: ", bestlam)
+
+lasso.pred = predict(lasso.mod, s = bestlam, newx = x_test, type="response")
+
+threshold = GeometricMean(lasso.pred, dev_df$Credit.Default, "LASSO")
+cat("\n The cut off threshold is: ", threshold)
+
+
+lasso.class = ifelse(lasso.pred > threshold, 1 , 0)
+
+lasso.table = table(lasso.class, dev_df$Credit.Default)[2:1, 2:1]
+lasso.table
+Accuracy_lasso = (lasso.table[1,1] + lasso.table[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the lasso model is ", Accuracy_lasso)
+
+Precision_lasso = lasso.table[1,1] /(lasso.table[1,1] + lasso.table[1,2])
+Recall_lasso = lasso.table[1,1] /(lasso.table[1,1] + lasso.table[2,1])
+F1_score_lasso = 2* ((Precision_lasso * Recall_lasso) / (Precision_lasso+ Recall_lasso))
+cat("\nThe F1_score of the logistic model is ", F1_score_lasso)
+
+
+# lasso.class = ifelse(lasso.pred >= 0.5, 1 , 0)
+# 
+# lasso.table = table(lasso.class, dev_df$Credit.Default)
+# Accuracy_lasso = (lasso.table[1,1] + lasso.table[2,2])/dim(dev_df)[1]
+# cat("\nThe accuracy of the LASSO model is ", Accuracy_lasso) 
+```
+
+
+```{r}
+
+test_data = df_test
+test_data$Id = NULL
+test_data$Credit.Default = 1
+test_data = model.matrix(Credit.Default~., data = test_data)
+
+yhat = predict(lasso.mod, s = bestlam, newx = test_data, type="response")
+
+df_test$Credit.Default = ifelse(yhat > threshold, 1 , 0)
+
+submit = data.frame(df_test$Id, df_test$Credit.Default)
+colnames(submit) = c("Id", "Credit Default")
+write.csv(submit,"holdout_lasso.csv", row.names = FALSE)
+df_test$Credit.Default = NULL
+```
+
+
+##### Decision Tree
+
+```{r}
+library(rpart)
+library(rpart.plot)
+
+CARTmod1 = rpart(Credit.Default~., data= train_df, method = 'class')
+prp(CARTmod1)
+
+tree.pred = predict(CARTmod1, dev_df)
+
+threshold = GeometricMean(tree.pred[,2], dev_df$Credit.Default, "Decision Tree")
+cat("\n The cut off threshold is: ", threshold)
+
+
+tree.class = ifelse(tree.pred > threshold, 1 , 0)
+
+tree.table = table(tree.class[,2], dev_df$Credit.Default)[2:1, 2:1]
+tree.table
+Accuracy_tree = (tree.table[1,1] + tree.table[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the tree model is ", Accuracy_tree)
+
+Precision_tree = tree.table[1,1] /(tree.table[1,1] + tree.table[1,2])
+Recall_tree = tree.table[1,1] /(tree.table[1,1] + tree.table[2,1])
+F1_score_tree = 2* ((Precision_tree * Recall_tree) / (Precision_tree+ Recall_tree))
+cat("\nThe F1_score of the logistic model is ", F1_score_tree)
+```
+
+```{r}
+
+yhat = predict(CARTmod1, df_test)
+
+df_test$Credit.Default = ifelse(yhat[,2] > threshold, 1 , 0)
+
+submit = data.frame(df_test$Id, df_test$Credit.Default)
+colnames(submit) = c("Id", "Credit Default")
+write.csv(submit,"holdout_tree.csv", row.names = FALSE)
+df_test$Credit.Default = NULL
+```
+
+
+##### SVM 
+###### SVM (Linear Kernel)
+
+Note: SVM is taking too much run time, so the code has been commented and the result are presented in the form of images.
+```{r}
+# library(e1071)
+# svmfit <- svm(Credit.Default~., data = train_df, kernel = "linear", cost = 1, scale = FALSE, probability=TRUE)
+# ypred <- predict(svmfit, dev_df,probability=TRUE)
+# 
+# threshold = GeometricMean(attr(ypred, "probabilities")[,1], dev_df$Credit.Default, "SVM")
+# cat("\n The cut off threshold is: ", threshold)
+# 
+# 
+# svm.class = ifelse(attr(ypred, "probabilities")[,1] > threshold, 1 , 0)
+# 
+# log.table.sv = table(predict = svm.class, truth = dev_df$Credit.Default)[2:1, 2:1]
+# log.table.sv
+# Accuracy_sv = (log.table.sv[1,1] + log.table.sv[2,2])/dim(dev_df)[1]
+# cat("\nThe accuracy of the SVM model is ", Accuracy_sv)
+# 
+# Precision_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[1,2])
+# Recall_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[2,1])
+# F1_score_sv_1_linear = 2* ((Precision_sv * Recall_sv) / (Precision_sv + Recall_sv))
+# cat("\nThe F1_score of the support vector classifier (Linear Kernel) with cost 1 is ", F1_score_sv_1_linear)
+# 
+# 
+# 
+# # cost = 0.1
+# svmfit <- svm(Credit.Default~., data = train_df, kernel = "linear", cost = 0.1, scale = FALSE, probability=TRUE)
+# ypred <- predict(svmfit, dev_df, probability=TRUE)
+# 
+# 
+# threshold = GeometricMean(attr(ypred, "probabilities")[,1], dev_df$Credit.Default, "SVM")
+# cat("\n The cut off threshold is: ", threshold)
+# 
+# 
+# svm.class = ifelse(attr(ypred, "probabilities")[,1] > threshold, 1 , 0)
+# 
+# log.table.sv = table(predict = svm.class, truth = dev_df$Credit.Default)[2:1, 2:1]
+# log.table.sv
+# 
+# Accuracy_sv = (log.table.sv[1,1] + log.table.sv[2,2])/dim(dev_df)[1]
+# cat("\nThe accuracy of the SVM model is ", Accuracy_sv)
+# 
+# Precision_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[1,2])
+# Recall_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[2,1])
+# F1_score_sv_0.1_linear = 2* ((Precision_sv * Recall_sv) / (Precision_sv + Recall_sv))
+# cat("\nThe F1_score of the support vector classifier (Linear Kernel) with cost 0.1 is ", F1_score_sv_0.1_linear)
+# 
+# Cost = 2
+# svmfit_linear_cost_2 <- svm(Credit.Default~., data = train_df, kernel = "linear", cost = 2, scale = FALSE, probability=TRUE)
+# ypred <- predict(svmfit_linear_cost_2, dev_df, probability=TRUE)
+# 
+# threshold_linear_cost_2 = GeometricMean(attr(ypred, "probabilities")[,1], dev_df$Credit.Default, "SVM")
+# cat("\n The cut off threshold is: ", threshold)
+# 
+# 
+# svm.class = ifelse(attr(ypred, "probabilities")[,1] > threshold_linear_cost_2, 1 , 0)
+# 
+# log.table.sv = table(predict = svm.class, truth = dev_df$Credit.Default)[2:1, 2:1]
+# log.table.sv
+# Accuracy_sv = (log.table.sv[1,1] + log.table.sv[2,2])/dim(dev_df)[1]
+# cat("\nThe accuracy of the SVM model is ", Accuracy_sv)
+# 
+# Precision_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[1,2])
+# Recall_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[2,1])
+# F1_score_sv_2_linear = 2* ((Precision_sv * Recall_sv) / (Precision_sv + Recall_sv))
+# cat("\nThe F1_score of the support vector classifier (Linear Kernel) with cost 2 is ", F1_score_sv_2_linear)
+```
+
+![SVM linear Kernel cost = 1](SVM linear cost 1.jpg "SVM linear Kernel cost = 1")
+![SVM linear Kernel cost = 0.1](SVM radial cost 0.jpg "SVM linear Kernel cost = 0.1")
+![SVM linear Kernel cost = 2](SVM linear cost 2.jpg "SVM linear Kernel cost = 2")
+
+
+###### SVM (Polynimial Kernel)
+```{r}
+# library(e1071)
+# svmfit <- svm(Credit.Default~., data = train_df, kernel = "polynomial", cost = 1, scale = FALSE, degree = 2, probability=TRUE)
+# ypred <- predict(svmfit, dev_df, probability=TRUE)
+# 
+# 
+# threshold = GeometricMean(attr(ypred, "probabilities")[,1], dev_df$Credit.Default, "SVM")
+# cat("\n The cut off threshold is: ", threshold)
+# 
+# 
+# svm.class = ifelse(attr(ypred, "probabilities")[,1] > threshold, 1 , 0)
+# 
+# log.table.sv = table(predict = svm.class, truth = dev_df$Credit.Default)[2:1, 2:1]
+# log.table.sv
+# Accuracy_sv = (log.table.sv[1,1] + log.table.sv[2,2])/dim(dev_df)[1]
+# cat("\nThe accuracy of the SVM model is ", Accuracy_sv)
+# 
+# Precision_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[1,2])
+# Recall_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[2,1])
+# F1_score_sv_1_poly = 2* ((Precision_sv * Recall_sv) / (Precision_sv + Recall_sv))
+# cat("\nThe F1_score of the support vector classifier (polynomial Kernel) with cost 1 is ", F1_score_sv_1_poly)
+# 
+# 
+# 
+# # cost = 0.1
+# svmfit <- svm(Credit.Default~., data = train_df, kernel = "polynomial", cost = 0.1, scale = FALSE, degree = 2, probability=TRUE)
+# ypred <- predict(svmfit, dev_df, probability=TRUE)
+# 
+# threshold = GeometricMean(attr(ypred, "probabilities")[,1], dev_df$Credit.Default, "SVM")
+# cat("\n The cut off threshold is: ", threshold)
+# 
+# 
+# svm.class = ifelse(attr(ypred, "probabilities")[,1] > threshold, 1 , 0)
+# 
+# log.table.sv = table(predict = svm.class, truth = dev_df$Credit.Default)[2:1, 2:1]
+# log.table.sv
+# 
+# Accuracy_sv = (log.table.sv[1,1] + log.table.sv[2,2])/dim(dev_df)[1]
+# cat("\nThe accuracy of the SVM model is ", Accuracy_sv)
+# 
+# Precision_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[1,2])
+# Recall_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[2,1])
+# F1_score_sv_0.1_poly = 2* ((Precision_sv * Recall_sv) / (Precision_sv + Recall_sv))
+# cat("\nThe F1_score of the support vector classifier (polynomial Kernel) with cost 0.1 is ", F1_score_sv_0.1_poly)
+# 
+# # Cost = 2
+# svmfit <- svm(Credit.Default~., data = train_df, kernel = "polynomial", cost = 2, scale = FALSE , degree = 2, probability=TRUE)
+# ypred <- predict(svmfit, dev_df, probability=TRUE)
+# 
+# 
+# threshold = GeometricMean(attr(ypred, "probabilities")[,1], dev_df$Credit.Default, "SVM")
+# cat("\n The cut off threshold is: ", threshold)
+# 
+# 
+# svm.class = ifelse(attr(ypred, "probabilities")[,1] > threshold, 1 , 0)
+# 
+# log.table.sv = table(predict = svm.class, truth = dev_df$Credit.Default)[2:1, 2:1]
+# log.table.sv
+# 
+# Accuracy_sv = (log.table.sv[1,1] + log.table.sv[2,2])/dim(dev_df)[1]
+# cat("\nThe accuracy of the SVM model is ", Accuracy_sv)
+# 
+# Precision_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[1,2])
+# Recall_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[2,1])
+# F1_score_sv_2_poly = 2* ((Precision_sv * Recall_sv) / (Precision_sv + Recall_sv))
+# cat("\nThe F1_score of the support vector classifier (polynomial Kernel) with cost 2 is ", F1_score_sv_2_poly)
+```
+
+![SVM Radial poly cost = 1](SVM poly cost 1.JPG "SVM poly Kernel cost = 1")
+![SVM Radial poly cost = 0.1](SVM poly cost 0.jpg "SVM pol Kernel cost = 0.1")
+![SVM ploy Kernel cost = 2](SVM poly cost 2.jpg "SVM poly Kernel cost = 2")
+
+###### SVM (Radial Kernel)
+```{r}
+# library(e1071)
+# svmfit <- svm(Credit.Default~., data = train_df, kernel = "radial", cost = 1, scale = FALSE, probability=TRUE)
+# ypred <- predict(svmfit, dev_df, probability=TRUE)
+# 
+# 
+# threshold = GeometricMean(attr(ypred, "probabilities")[,1], dev_df$Credit.Default, "SVM")
+# cat("\n The cut off threshold is: ", threshold)
+# 
+# 
+# svm.class = ifelse(attr(ypred, "probabilities")[,1] > threshold, 1 , 0)
+# 
+# log.table.sv = table(predict = svm.class, truth = dev_df$Credit.Default)[2:1, 2:1]
+# log.table.sv
+# Accuracy_sv = (log.table.sv[1,1] + log.table.sv[2,2])/dim(dev_df)[1]
+# cat("\nThe accuracy of the SVM model is ", Accuracy_sv)
+# 
+# Precision_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[1,2])
+# Recall_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[2,1])
+# F1_score_sv_1_radial = 2* ((Precision_sv * Recall_sv) / (Precision_sv + Recall_sv))
+# cat("\nThe F1_score of the support vector classifier (Radial Kernel) with cost 1 is ", F1_score_sv_1_radial)
+# 
+# 
+# 
+# # cost = 0.1
+# svmfit <- svm(Credit.Default~., data = train_df, kernel = "radial", cost = 0.1, scale = FALSE, probability=TRUE)
+# ypred <- predict(svmfit, dev_df, probability=TRUE)
+# 
+# 
+# threshold = GeometricMean(attr(ypred, "probabilities")[,1], dev_df$Credit.Default, "SVM")
+# cat("\n The cut off threshold is: ", threshold)
+# 
+# 
+# svm.class = ifelse(attr(ypred, "probabilities")[,1] > threshold, 1 , 0)
+# 
+# log.table.sv = table(predict = svm.class, truth = dev_df$Credit.Default)[2:1, 2:1]
+# log.table.sv
+# 
+# Accuracy_sv = (log.table.sv[1,1] + log.table.sv[2,2])/dim(dev_df)[1]
+# cat("\nThe accuracy of the SVM model is ", Accuracy_sv)
+# 
+# Precision_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[1,2])
+# Recall_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[2,1])
+# F1_score_sv_0.1_radial = 2* ((Precision_sv * Recall_sv) / (Precision_sv + Recall_sv))
+# cat("\nThe F1_score of the support vector classifier (Radial Kernel) with cost 0.1 is ", F1_score_sv_0.1_radial)
+# 
+# # Cost = 2
+# svmfit <- svm(Credit.Default~., data = train_df, kernel = "radial", cost = 2, scale = FALSE, probability=TRUE)
+# ypred <- predict(svmfit, dev_df, probability=TRUE)
+# 
+# 
+# threshold = GeometricMean(attr(ypred, "probabilities")[,1], dev_df$Credit.Default, "SVM")
+# cat("\n The cut off threshold is: ", threshold)
+# 
+# 
+# svm.class = ifelse(attr(ypred, "probabilities")[,1] > threshold, 1 , 0)
+# 
+# log.table.sv = table(predict = svm.class, truth = dev_df$Credit.Default)[2:1, 2:1]
+# log.table.sv
+# 
+# Accuracy_sv = (log.table.sv[1,1] + log.table.sv[2,2])/dim(dev_df)[1]
+# cat("\nThe accuracy of the SVM model is ", Accuracy_sv)
+# 
+# Precision_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[1,2])
+# Recall_sv = log.table.sv[1,1] /(log.table.sv[1,1] + log.table.sv[2,1])
+# F1_score_sv_2_radial = 2* ((Precision_sv * Recall_sv) / (Precision_sv + Recall_sv))
+# cat("\nThe F1_score of the support vector classifier (Radial Kernel) with cost 2 is ", F1_score_sv_2_radial)
+```
+![SVM Radial Kernel cost = 1](SVM radial cost 1.JPG "SVM Radial Kernel cost = 1")
+![SVM Radial Kernel cost = 0.1](SVM radial cost 0.JPG "SVM Radial Kernel cost = 0.1")
+![SVM Radial Kernel cost = 2](SVM radial cost 2.JPG "SVM Radial Kernel cost = 2")
+
+
+```{r}
+# 
+# yhat =  predict(svmfit_linear_cost_2, df_test, probability=TRUE)
+# 
+# df_test$Credit.Default = ifelse(attr(yhat, "probabilities")[,1]> threshold_linear_cost_2 , 1 , 0)
+# 
+# submit = data.frame(df_test$Id, df_test$Credit.Default)
+# colnames(submit) = c("Id", "Credit Default")
+# write.csv(submit,"holdout_svm.csv", row.names = FALSE)
+# df_test$Credit.Default = NULL
+```
+
+
+
+
+##### Bagging
+```{r}
+library(randomForest)
+bagging_and_random_forest = function(df, NumberofTree, devdf, mtryValue, setSeedValue) {
+  
+set.seed(setSeedValue)
+bagging.default = randomForest(Credit.Default~., data= df, mtry = mtryValue, importance= TRUE, ntree = NumberofTree)
+yhat.bagging = predict(bagging.default, newdata= devdf, type='prob')
+
+threshold = GeometricMean(yhat.bagging[,2], dev_df$Credit.Default, paste("Bagging (",NumberofTree," trees)" ))
+cat("\n The cut off threshold is: ", threshold)
+
+
+bagging.class = ifelse(yhat.bagging[,2] > threshold, 1 , 0)
+
+bagging.table = table(bagging.class, dev_df$Credit.Default)[2:1, 2:1]
+bagging.table
+Accuracy_bagging = (bagging.table[1,1] + bagging.table[2,2])/dim(devdf)[1]
+cat("\nThe accuracy of the Bagging model with" ,NumberofTree ,"trees is ", Accuracy_bagging)
+
+Precision_bagging = bagging.table[1,1] /(bagging.table[1,1] + bagging.table[1,2])
+Recall_bagging = bagging.table[1,1] /(bagging.table[1,1] + bagging.table[2,1])
+F1_score_bagging = 2* ((Precision_bagging * Recall_bagging) / (Precision_bagging+ Recall_bagging))
+cat("\nThe F1_score of the Bagging model with ",NumberofTree, " trees is ", F1_score_bagging)
+
+return(F1_score_bagging)
+}
+
+F1_score_bagging_100 = bagging_and_random_forest(train_df, 100, dev_df, ((ncol(train_df))-1), 59)
+F1_score_bagging_250 = bagging_and_random_forest(train_df, 250, dev_df, ((ncol(train_df))-1), 59)
+F1_score_bagging_500 = bagging_and_random_forest(train_df, 500, dev_df, ((ncol(train_df))-1), 59)
+```
+
+
+```{r}
+### Using the best model to test the holdout set F1 score
+# Bagging with 500 trees
+set.seed(59)
+bagging.default_500 = randomForest(Credit.Default~., data= train_df, mtry = ((ncol(train_df))-1), importance= TRUE, ntree = 500)
+yhat.bagging_500 = predict(bagging.default_500, newdata= dev_df, type='prob')
+
+threshold = GeometricMean(yhat.bagging_500[,2], dev_df$Credit.Default, "Bagging with 500 trees")
+cat("\n The cut off threshold is: ", threshold)
+
+
+bagging.class_500 = ifelse(yhat.bagging_500[,2] > threshold, 1 , 0)
+
+bagging.table_500 = table(bagging.class_500, dev_df$Credit.Default)[2:1, 2:1]
+bagging.table_500
+Accuracy_bagging_500 = (bagging.table_500[1,1] + bagging.table_500[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the Bagging model with 500 is ", Accuracy_bagging_500)
+
+Precision_bagging_500 = bagging.table_500[1,1] /(bagging.table_500[1,1] + bagging.table_500[1,2])
+Recall_bagging_500 = bagging.table_500[1,1] /(bagging.table_500[1,1] + bagging.table_500[2,1])
+F1_score_bagging_500 = 2* ((Precision_bagging_500 * Recall_bagging_500) / (Precision_bagging_500+ Recall_bagging_500))
+cat("\nThe F1_score of the Bagging model with 500 trees is ", F1_score_bagging_500)
+
+```
+
+```{r}
+
+yhat = predict(bagging.default_500, newdata= df_test, type='prob')
+
+df_test$Credit.Default = ifelse(yhat[,2] > threshold, 1 , 0)
+
+submit = data.frame(df_test$Id, df_test$Credit.Default)
+colnames(submit) = c("Id", "Credit Default")
+write.csv(submit,"holdout_bagging_500.csv", row.names = FALSE)
+df_test$Credit.Default = NULL
+```
+
+
+
+
+##### Random Forest
+```{r}
+library(randomForest)
+
+F1_score_rf_100 = bagging_and_random_forest(train_df, 100, dev_df, sqrt(((ncol(train_df))-1)), 57)
+F1_score_rf_250 = bagging_and_random_forest(train_df, 250, dev_df, sqrt(((ncol(train_df))-1)), 57)
+F1_score_rf_500 = bagging_and_random_forest(train_df, 500, dev_df, sqrt(((ncol(train_df))-1)), 57)
+```
+
+
+
+```{r}
+### Using the best model to test the holdout set F1 score
+#Random forest with 250 trees
+set.seed(57)
+rf.default_250 = randomForest(Credit.Default~., data= train_df, mtry = sqrt(((ncol(train_df))-1)), importance= TRUE, ntree = 250)
+yhat.rf_250 = predict(rf.default_250, newdata= dev_df, type='prob')
+
+
+threshold250 = GeometricMean(yhat.rf_250[,2], dev_df$Credit.Default, "Random Forest with 250 trees")
+cat("\n The cut off threshold is: ", threshold250)
+
+
+rf.class_250 = ifelse(yhat.rf_250[,2] > threshold250, 1 , 0)
+
+rf.table_250 = table(rf.class_250, dev_df$Credit.Default)[2:1, 2:1]
+rf.table_250
+Accuracy_rf_250 = (rf.table_250[1,1] + rf.table_250[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the rf model with 250 is ", Accuracy_rf_250)
+
+Precision_rf_250 = rf.table_250[1,1] /(rf.table_250[1,1] + rf.table_250[1,2])
+Recall_rf_250 = rf.table_250[1,1] /(rf.table_250[1,1] + rf.table_250[2,1])
+F1_score_rf_250 = 2* ((Precision_rf_250 * Recall_rf_250) / (Precision_rf_250+ Recall_rf_250))
+cat("\nThe F1_score of the rf model with 250 trees is ", F1_score_rf_250)
+```
+
+```{r}
+
+yhat = predict(rf.default_250, newdata= df_test, type='prob')
+
+df_test$Credit.Default = ifelse(yhat[,2] > threshold250, 1 , 0)
+
+submit = data.frame(df_test$Id, df_test$Credit.Default)
+colnames(submit) = c("Id", "Credit Default")
+write.csv(submit,"holdout_rf_250.csv", row.names = FALSE)
+df_test$Credit.Default = NULL
+```
+
+
+
+##### Boosting
+```{r}
+#install.packages('gbm')
+library(gbm)
+Boosting = function(df, devdf, NumberofTrees, shrinkageValue) {
+
+set.seed(63)
+boost.default = gbm(Credit.Default~., data= df, distribution = 'bernoulli', n.trees = NumberofTrees, interaction.depth = 4, shrinkage = shrinkageValue)
+yhat.boost = predict(boost.default, newdata = dev_df, n.trees = NumberofTrees)
+
+threshold = GeometricMean(yhat.boost, dev_df$Credit.Default, paste("Boosting with ", NumberofTrees, "trees"))
+cat("\n The cut off threshold is: ", threshold)
+
+
+boost.class = ifelse(yhat.boost > threshold, 1 , 0)
+
+boost.table = table(boost.class, dev_df$Credit.Default)[2:1, 2:1]
+boost.table
+Accuracy_boost = (boost.table[1,1] + boost.table[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the boost model with", NumberofTrees, "trees is ", Accuracy_boost)
+
+Precision_boost = boost.table[1,1] /(boost.table[1,1] + boost.table[1,2])
+Recall_boost = boost.table[1,1] /(boost.table[1,1] + boost.table[2,1])
+F1_score_boost = 2* ((Precision_boost * Recall_boost) / (Precision_boost+ Recall_boost))
+cat("\nThe F1_score of the boost model with ", NumberofTrees, " trees is ", F1_score_boost)
+
+return(F1_score_boost)
+}
+```
+
+
+###### Boosting shrinkage = 0.1
+```{r}
+
+train_df$Credit.Default <- as.character(train_df$Credit.Default)
+dev_df$Credit.Default <- as.character(dev_df$Credit.Default)
+
+F1_score_boost_100 = Boosting(train_df, dev_df, 100, 0.1)
+F1_score_boost_250 = Boosting(train_df, dev_df, 250, 0.1)
+F1_score_boost_500 = Boosting(train_df, dev_df, 500, 0.1)
+```
+
+###### Boosting shrinkage = 0.01
+```{r}
+F1_score_boost_shrink_100 = Boosting(train_df, dev_df, 100, 0.01)
+F1_score_boost_shrink_250 = Boosting(train_df, dev_df, 250, 0.01)
+F1_score_boost_shrink_500 = Boosting(train_df, dev_df, 500, 0.01)
+```
+
+```{r}
+### Using the best model to test the holdout set F1 score
+#install.packages('gbm')
+library(gbm)
+
+set.seed(63)
+boost.default_100 = gbm(Credit.Default~., data= train_df, distribution = 'bernoulli', n.trees = 100, interaction.depth = 4, shrinkage = 0.1)
+yhat.boost_100 = predict(boost.default_100, newdata = dev_df, n.trees = 100)
+
+par(pty ='s')
+boost_roc_100 = roc(dev_df$Credit.Default, yhat.boost_100, plot = FALSE, percent = TRUE, xlab= "FPR", ylab = "TPR", legacy.axes = TRUE)
+cat("\nThe AUC of the Boosting model with 100 tress is ", boost_roc_100$auc)
+
+
+roc.df = data.frame(
+  tpr = boost_roc_100$sensitivities,
+  specificity = boost_roc_100$specificities,
+  gmean = sqrt(boost_roc_100$sensitivities * boost_roc_100$specificities),
+  threshold = boost_roc_100$thresholds
+)
+
+threshold100 = GeometricMean(yhat.boost_100, dev_df$Credit.Default, "Boosting with 100 trees")
+cat("\n The cut off threshold is: ", threshold100)
+
+
+boost.class_100 = ifelse(yhat.boost_100 > threshold100, 1 , 0)
+
+boost.table_100 = table(boost.class_100, dev_df$Credit.Default)[2:1, 2:1]
+boost.table_100
+Accuracy_boost_100 = (boost.table_100[1,1] + boost.table_100[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the boost model with 100 trees is ", Accuracy_boost_100)
+
+Precision_boost_100 = boost.table_100[1,1] /(boost.table_100[1,1] + boost.table_100[1,2])
+Recall_boost_100 = boost.table_100[1,1] /(boost.table_100[1,1] + boost.table_100[2,1])
+F1_score_boost_100 = 2* ((Precision_boost_100 * Recall_boost_100) / (Precision_boost_100+ Recall_boost_100))
+cat("\nThe F1_score of the boost model with 100 trees is ", F1_score_boost_100)
+
+```
+
+```{r}
+
+yhat = predict(boost.default_100, newdata = df_test, n.trees = 100)
+
+df_test$Credit.Default = ifelse(yhat > threshold100, 1 , 0)
+
+submit = data.frame(df_test$Id, df_test$Credit.Default)
+colnames(submit) = c("Id", "Credit Default")
+write.csv(submit,"holdout_boost_0.1_100.csv", row.names = FALSE)
+df_test$Credit.Default = NULL
+```
+
+
+
+
+##### XGBoost
+```{r}
+#install.packages("xgboost")
+library(xgboost)
+
+XtremeBoost = function(df, devdf, numberofTrees) {
+set.seed(52)
+xgb = xgboost(data = data.matrix(train_df[, ! names(df) %in% c("Credit.Default"), drop = F]), 
+ label = train_df[, c("Credit.Default")], 
+ max_depth = 15, 
+ nround=numberofTrees, 
+ subsample = 0.5,
+ colsample_bytree = 0.5,
+ objective = "binary:logistic",
+ num_class = 1,
+ verbose = 0
+)
+
+# predict values in test set
+y_pred <- predict(xgb, data.matrix( dev_df[, ! names(dev_df) %in% c("Credit.Default"), drop = F]  ), ,reshape=T)
+
+threshold = GeometricMean(y_pred, dev_df$Credit.Default, paste("XGBoost with ",numberofTrees, " trees"))
+cat("\n The cut off threshold is: ", threshold)
+
+
+xgboost.class = ifelse(y_pred > threshold, 1 , 0)
+
+xgboost.table = table(xgboost.class, dev_df$Credit.Default)[2:1, 2:1]
+xgboost.table
+Accuracy_xgboost = (xgboost.table[1,1] + xgboost.table[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the XGBboost model with ", numberofTrees,"trees is ", Accuracy_xgboost)
+
+Precision_xgboost = xgboost.table[1,1] /(xgboost.table[1,1] + xgboost.table[1,2])
+Recall_xgboost = xgboost.table[1,1] /(xgboost.table[1,1] + xgboost.table[2,1])
+F1_score_xgboost = 2* ((Precision_xgboost * Recall_xgboost) / (Precision_xgboost+ Recall_xgboost))
+cat("\nThe F1_score of the XGBoost model with ", numberofTrees," trees is ", F1_score_xgboost)
+
+return(F1_score_xgboost)
+}
+
+
+F1_score_xgboost_100 = XtremeBoost(train_df, dev_df, 100)
+F1_score_xgboost_250 = XtremeBoost(train_df, dev_df, 250)
+F1_score_xgboost_500 = XtremeBoost(train_df, dev_df, 500)
+```
+
+```{r}
+### Using the best model to test the holdout set F1 score
+set.seed(52)
+xgb = xgboost(data = data.matrix(train_df[, ! names(train_df) %in% c("Credit.Default"), drop = F]), 
+ label = train_df[, c("Credit.Default")], 
+ max_depth = 15, 
+ nround=500, 
+ subsample = 0.5,
+ colsample_bytree = 0.5,
+ objective = "binary:logistic",
+ num_class = 1,
+ verbose = 0
+)
+
+# predict values in test set
+y_pred <- predict(xgb, data.matrix( dev_df[, ! names(dev_df) %in% c("Credit.Default"), drop = F]  ), ,reshape=T)
+
+
+threshold =  GeometricMean(y_pred, dev_df$Credit.Default, "XGBoost with 500 trees")
+cat("\n The cut off threshold is: ", threshold)
+
+
+xgboost.class = ifelse(y_pred > threshold, 1 , 0)
+
+xgboost.table = table(xgboost.class, dev_df$Credit.Default)[2:1, 2:1]
+xgboost.table
+Accuracy_xgboost = (xgboost.table[1,1] + xgboost.table[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the XGBboost model with 100 is ", Accuracy_xgboost)
+
+Precision_xgboost = xgboost.table[1,1] /(xgboost.table[1,1] + xgboost.table[1,2])
+Recall_xgboost = xgboost.table[1,1] /(xgboost.table[1,1] + xgboost.table[2,1])
+F1_score_xgboost_500 = 2* ((Precision_xgboost * Recall_xgboost) / (Precision_xgboost+ Recall_xgboost))
+cat("\nThe F1_score of the XGBoost model with 100 trees is ", F1_score_xgboost_500)
+
+
+```
+
+
+```{r}
+
+yhat = predict(xgb, data.matrix( df_test[, ! names(df_test) %in% c("Credit.Default", "Id"), drop = F]  ), ,reshape=T)
+
+df_test$Credit.Default = ifelse(yhat > threshold, 1 , 0)
+
+submit = data.frame(df_test$Id, df_test$Credit.Default)
+colnames(submit) = c("Id", "Credit Default")
+write.csv(submit,"holdout_xgboost_500.csv", row.names = FALSE)
+df_test$Credit.Default = NULL
+```
+
+
+##### Summary
+```{r}
+dt = matrix(c(F1_score_log, F1_score_ridge, F1_score_lasso, F1_score_tree, F1_score_bagging_100,
+F1_score_bagging_250, F1_score_bagging_500, F1_score_rf_100, F1_score_rf_250,
+F1_score_rf_500, F1_score_boost_100, F1_score_boost_250, F1_score_boost_500, 
+F1_score_boost_shrink_100, F1_score_boost_shrink_250, F1_score_boost_shrink_500,
+F1_score_xgboost_100, F1_score_xgboost_250, F1_score_xgboost_500, F1_score_knn[index],
+F1_score_lda, F1_score_qda), ncol=1, byrow=TRUE)
+
+colnames(dt) <- c("Test Set F1 Score")
+rownames(dt) <- c('Logistic Regression', "Ridge", "LASSO", "Decision Tree",
+                  "Bagging 100 Trees", "Bagging 250 Trees", "Bagging 500 Trees",
+                  "Random Forest 100 Trees", "Random Forest 250 Trees", "Random Forest 500 Trees",
+                  "Boosting 100 Trees", "Boosting 250 Trees", "Boosting 500 Trees",
+                  "Boosting Shrinkage 100 Trees", "Boosting Shrinkage 250 Trees",
+                  "Boosting Shrinkage 500 Trees", "XGBoost 100 trees", "XGBoost 250 trees", "XGBoost 500 trees", "KNN", "LDA", "QDA")
+
+dt[order(dt[,1], decreasing = TRUE),]
+
+```
+
+
+#### Model Fitting
+```{r}
+
+
+train_df$Credit.Default <- as.factor(train_df$Credit.Default)
+dev_df$Credit.Default <- as.factor(dev_df$Credit.Default)
+df_train$Credit.Default <- as.factor(df_train$Credit.Default)
+
+#Random forest with 250 trees
+set.seed(57)
+rf.default_250 = randomForest(Credit.Default~., data= train_df, mtry = sqrt(((ncol(train_df))-1)), importance= TRUE, ntree = 250)
+yhat.rf_250 = predict(rf.default_250, newdata= dev_df, type='prob')
+
+par(pty ='s')
+rf_roc_250 = roc(dev_df$Credit.Default, yhat.rf_250[,2], plot = TRUE, percent = TRUE, xlab= "FPR", ylab = "TPR", legacy.axes = TRUE)
+cat("\nThe AUC of the Random Forest model with 250 tress is ", rf_roc_250$auc)
+
+roc.df = data.frame(
+  tpr = rf_roc_250$sensitivities,
+  FPR = (100 -rf_roc_250$specificities),
+  gmean = sqrt(rf_roc_250$sensitivities * rf_roc_250$specificities),
+  threshold = rf_roc_250$thresholds
+)
+
+threshold250 = roc.df[roc.df$gmean == max(roc.df$gmean), ]$threshold
+cat("\n The cut off threshold is: ", threshold250)
+
+
+rf.class_250 = ifelse(yhat.rf_250[,2] > threshold250, 1 , 0)
+
+rf.table_250 = table(rf.class_250, dev_df$Credit.Default)[2:1, 2:1]
+rf.table_250
+Accuracy_rf_250 = (rf.table_250[1,1] + rf.table_250[2,2])/dim(dev_df)[1]
+cat("\nThe accuracy of the rf model with 250 is ", Accuracy_rf_250)
+
+Precision_rf_250 = rf.table_250[1,1] /(rf.table_250[1,1] + rf.table_250[1,2])
+Recall_rf_250 = rf.table_250[1,1] /(rf.table_250[1,1] + rf.table_250[2,1])
+F1_score_rf_250 = 2* ((Precision_rf_250 * Recall_rf_250) / (Precision_rf_250+ Recall_rf_250))
+cat("\nThe F1_score of the rf model with 250 trees is ", F1_score_rf_250)
+```
+
+
+```{r}
+library(ggplot2)
+highlight_df = data.frame (roc.df[roc.df$gmean == max(roc.df$gmean), ])
+colnames(roc.df) = c( "TPR", "FPR", "gmean",  "threshold")
+ggplot(roc.df,aes(FPR,TPR)) + 
+  geom_line() + 
+  geom_point(data=highlight_df, aes(x= FPR ,y=tpr), color='red',size=3)
+  
+# plot((1- roc.df$specificity), roc.df$tpr, type ='l' )
+# points((1 - roc.df[roc.df$gmean == max(roc.df$gmean), ]$specificity) , roc.df$tpr)
+```
+
+
+```{r}
+rf.default_250 = randomForest(Credit.Default~. - Id, data= df_train, mtry = sqrt(((ncol(train_df))-1)), importance= TRUE, ntree = 250)
+
+yhat.rf_250 = predict(rf.default_250, newdata= df_test, type='prob')
+
+df_test$Credit.Default = ifelse(yhat.rf_250[,2] > threshold250, 1 , 0)
+
+submit = data.frame(df_test$Id, df_test$Credit.Default)
+colnames(submit) = c("Id", "Credit Default")
+write.csv(submit,"submission.csv", row.names = FALSE)
+
+```
+
+
+#### Variable Importance
+```{r}
+varImpPlot(rf.default_250)
+```
+
+```{r}
+summary(boost.default_100)
+```
+
+
+```{r}
+lasso.coef =  predict(lasso.mod, s = bestlam, type="coefficients")
+lasso.coef
+```
+
+
+```{r}
+# Variable Importance
+rf.default_250 = randomForest(Credit.Default~Maximum.Open.Credit +  Monthly.Debt + Term+ Annual.Income_trans + Credit.Score, data= df_train, mtry = sqrt(((ncol(train_df))-1)), importance= TRUE, ntree = 250)
+
+yhat.rf_250 = predict(rf.default_250, newdata= df_test, type='prob')
+
+df_test$Credit.Default = ifelse(yhat.rf_250[,2] > threshold250, 1 , 0)
+
+submit = data.frame(df_test$Id, df_test$Credit.Default)
+colnames(submit) = c("Id", "Credit Default")
+write.csv(submit,"Variable Importance.csv", row.names = FALSE)
+
+```
